@@ -1,73 +1,29 @@
-<?xml version="1.0"?>
-<project name="jfinal" default="sendFilesToFTP" basedir=".">
-<property name="classes" value="build/classes"/>
-<property name="build" value="build"/>
-<property name="lib" value="WebRoot/WEB-INF/lib"/>
-<property name="src" value="src"/>
-<path id="master-classpath">
-<fileset file="${lib}/*.jar" />
-<pathelement path="${classes}" />
-</path>
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="MyProject" default="build" basedir=".">
 
-<!-- 初始化任务 -->
-<target name="init">
-<!-- 输出标签 ，${init}是builds.properties中的属性 -->
-<echo message=" start:"/>
-<echo message="-------------------------------------------------------"/>
-<echo message=" init ${init} ..."/>
-<echo message="-------------------------------------------------------"/>
-</target>
+  <!-- 定义属性 -->
+  <property name="src.dir" value="src" />
+  <property name="build.dir" value="build" />
+  <property name="dist.dir" value="dist" />
 
-<!-- 删除build路径-->
-<target name="clean" depends="init">
-<delete dir="build"/>
-</target>
+  <!-- 定义目标 -->
+  <target name="clean">
+    <delete dir="${build.dir}" />
+    <delete dir="${dist.dir}" />
+  </target>
 
-<!-- 建立build/classes路径，并编译class文件到build/classes路径下-->
-<target name="compile" depends="clean">
-<mkdir dir="${classes}"/>
-<javac srcdir="src" destdir="${classes}">
-<classpath refid="master-classpath" />
+  <target name="compile" depends="clean">
+    <mkdir dir="${build.dir}" />
+    <javac srcdir="${src.dir}" destdir="${build.dir}" />
+  </target>
 
-</javac>
-</target>
+  <target name="dist" depends="compile">
+    <mkdir dir="${dist.dir}" />
+    <jar destfile="${dist.dir}/MyProject.jar" basedir="${build.dir}" />
+  </target>
 
-<!-- 打war包-->
-<target name="war" depends="compile">
-<copy todir="${classes}" >
-<fileset dir="src" includes="**/*.properties"/>
-</copy>
-<war destfile="${build}/jfinal.war"
-webxml="WebRoot/WEB-INF/web.xml">
-<!-- 拷贝WebRoot下除了WEB-INF和META-INF的两个文件夹-->
-<fileset dir="WebRoot" includes="**/*.jsp"/>
+  <target name="build" depends="clean, compile, dist">
+    <echo message="Build completed." />
+  </target>
 
-
-
-<!-- 拷贝lib目录下的jar包-->
-<lib dir="${lib}"/>
-<!-- 拷贝build/classes下的class文件-->
-<classes dir="${classes}"/>
-
-</war>
-</target>
-
-<target name="sendFilesToFTP" depends="war">
-
-<ftp server="192.168.6.144"
-port="21" userid="uftp"
-password="uftp"
-remotedir="/home/uftp"
-depends="yes"
-verbose="yes">
-<fileset dir="${build}">
-<include name="jfinal.war" />
-</fileset>
-<!--
-<fileset dir="${basedir}">
-<include name="test/*.txt" />
-</fileset>
--->
-</ftp>
-</target>
 </project>
